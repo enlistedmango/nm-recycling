@@ -32,6 +32,8 @@ local function InitializeDatabase()
             `completed` tinyint(1) NOT NULL DEFAULT 0,
             `collected` tinyint(1) NOT NULL DEFAULT 0,
             `location_id` int(11) NOT NULL DEFAULT 1,
+            `item_type` varchar(20) NOT NULL DEFAULT 'choice',
+            `target_material` varchar(50) NULL,
             PRIMARY KEY (`id`),
             KEY `citizenid` (`citizenid`)
         )
@@ -45,11 +47,12 @@ local function InitializeDatabase()
     local hasItemType = exports.oxmysql:executeSync([[
         SELECT COUNT(*) as count
         FROM information_schema.columns
-        WHERE table_name = 'recycling_batches'
+        WHERE table_schema = DATABASE()
+        AND table_name = 'recycling_batches'
         AND column_name = 'item_type'
     ]])
 
-    if hasItemType[1].count == 0 then
+    if not hasItemType or not hasItemType[1] or hasItemType[1].count == 0 then
         exports.oxmysql:executeSync([[
             ALTER TABLE `recycling_batches`
             ADD COLUMN `item_type` varchar(20) NOT NULL DEFAULT 'choice'
@@ -59,11 +62,12 @@ local function InitializeDatabase()
     local hasTargetMaterial = exports.oxmysql:executeSync([[
         SELECT COUNT(*) as count
         FROM information_schema.columns
-        WHERE table_name = 'recycling_batches'
+        WHERE table_schema = DATABASE()
+        AND table_name = 'recycling_batches'
         AND column_name = 'target_material'
     ]])
 
-    if hasTargetMaterial[1].count == 0 then
+    if not hasTargetMaterial or not hasTargetMaterial[1] or hasTargetMaterial[1].count == 0 then
         exports.oxmysql:executeSync([[
             ALTER TABLE `recycling_batches`
             ADD COLUMN `target_material` varchar(50) NULL
